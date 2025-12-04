@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="uk">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>МЕС КРІСМАС</title>
+    <style>
+        :root {
+            --bg: #071022;
+            --panel: #0b1220;
+            --accent: #ffefc4;
+            --neon: #7ef9ff;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, Arial, sans-serif;
+            background: linear-gradient(180deg, #071022 0%, #09162a 60%);
+            color: var(--accent);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(6px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03)
+        }
+
+        .logo {
+            display: flex;
+            gap: 12px;
+            align-items: center
+        }
+
+        .logo .dot {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(90deg, #ffd28a, #ff8ac1);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #071022
+        }
+
+        nav {
+            display: flex;
+            gap: 8px
+        }
+
+        .tab {
+            padding: 8px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: .2s;
+            border: 1px solid transparent
+        }
+
+        .tab:hover {
+            transform: translateY(-2px)
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(126, 249, 255, 0.12);
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.6)
+        }
+
+        main {
+            flex: 1;
+            padding: 28px
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto
+        }
+
+        .pane {
+            display: none
+        }
+
+        .pane.active {
+            display: block
+        }
+
+        /* Падаючий сніг */
+        .snowflake {
+            position: fixed;
+            top: -10px;
+            color: white;
+            font-size: 20px;
+            user-select: none;
+            pointer-events: none;
+            animation: snowfall linear infinite;
+            z-index: 9999;
+        }
+
+        @keyframes snowfall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
+        }
+
+        .game-wrap {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 20px;
+            align-items: start
+        }
+
+        .panel {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 14px;
+            padding: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.03)
+        }
+
+        .game-canvas {
+            background: linear-gradient(180deg, #012 40%, #043 100%);
+            border-radius: 12px;
+            width: 100%;
+            height: 500px;
+            display: block
+        }
+
+        @media(max-width:900px) {
+            .game-wrap {
+                grid-template-columns: 1fr
+            }
+
+            .game-canvas {
+                height: 360px
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Сніг -->
+    <script>
+        function createSnow() {
+            const s = document.createElement('div');
+            s.className = 'snowflake';
+            s.textContent = '❄';
+            s.style.left = Math.random() * 100 + 'vw';
+            s.style.animationDuration = (4 + Math.random() * 6) + 's';
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 10000);
+        }
+        setInterval(createSnow, 200);
+    </script>
+
+    <header>
+        <div class="logo">
+            <div class="dot">🎄</div>
+            <div>
+                <div style="font-weight:700">Різдвяний майданчик</div>
+                <div style="font-size:12px;opacity:.7">Тут усе працює, ефекти, гра і музика</div>
+            </div>
+        </div>
+        <nav>
+            <div class="tab active" data-tab="tab1">Почитаєме чуть-чуть</div>
+            <div class="tab" data-tab="tab2">Гра</div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+
+            <!-- ГОЛОВНА -->
+            <section id="tab1" class="pane active">
+                <h1>НИНІ 5 ГРУДНЯ ОСТАННІЙ ДЕНЬ ШКОЛИ ОСТАННІЙ ДЕНЬ ЯК МИ СЯ ВЧИМО ІСЬОГО РОКУ<br/>
+                Короче мало побавиме у ігру яка на 2 вкладці (інструкцію читайте там же)</h1>
+            </section>
+
+            <!-- ГРА -->
+            <section id="tab2" class="pane">
+                <div class="game-wrap">
+                    <div class="panel">
+                        <canvas id="game" class="game-canvas"></canvas>
+                    </div>
+
+                    <aside class="panel">
+                        <h3 style="margin-top:0">Налаштування та аудіо</h3>
+                        <label>Завантажити аудіо:</label>
+                        <input id="audio-file" type="file" accept="audio/*">
+
+                        <div style="display:flex;gap:8px;align-items:center;margin-top:10px">
+                            <label>Гучність:</label>
+                            <input id="volume" type="range" min="0" max="1" step="0.01" value="0.6">
+                        </div>
+
+                        <div style="display:flex;gap:8px;margin-top:10px">
+                            <button id="startBtn">Старт</button>
+                            <button id="resetBtn">Рестарт</button>
+                            <button id="muteBtn">Mute</button>
+                        </div>
+
+                        <p style="opacity:.8;font-size:13px;margin-top:10px">Лови подарунки, уникай поганих!</p>
+
+                        <div style="font-size:14px;color:var(--neon)">Очки: <span id="score">0</span></div>
+                    </aside>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <audio id="bg-audio" loop></audio>
+
+<script>
+    // Tabs
+    const panes = document.querySelectorAll('.pane');
+    const bgAudio = document.getElementById("bg-audio");
+
+    document.querySelectorAll('.tab').forEach(t => {
+        t.onclick = () => {
+            document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+            t.classList.add('active');
+
+            const id = t.dataset.tab;
+            panes.forEach(p => p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            // 🎵 Музика працює тільки у вкладці "Гра"
+            if (id === "tab2") {
+                if (bgAudio.src) bgAudio.play().catch(()=>{});
+            } else {
+                bgAudio.pause();
+            }
+        };
+    });
+
+    // Canvas setup
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+
+    function fitCanvas() {
+        const r = canvas.getBoundingClientRect();
+        const d = window.devicePixelRatio || 1;
+        canvas.width = r.width * d;
+        canvas.height = r.height * d;
+        ctx.setTransform(d, 0, 0, d, 0, 0);
+    }
+    window.addEventListener("resize", fitCanvas);
+    fitCanvas();
+
+    // GAME
+    let running = false;
+    let last = 0;
+    let timeLeft = 60;
+
+    const state = {
+        score: 0,
+        playerX: 200,
+        playerY: 400,
+        size: 70,
+        gifts: [],
+        spawnTimer: 0
+    };
+
+    function reset() {
+        state.score = 0;
+        timeLeft = 60;
+        state.gifts = [];
+        document.getElementById("score").textContent = 0;
+        draw();
+    }
+
+    function spawnGift() {
+        const side = Math.floor(Math.random() * 4);
+        const size = 26 + Math.random() * 24;
+        const speed = 140 + Math.random() * 120;
+        let x, y, vx = 0, vy = 0;
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+
+        if (side === 0) { x = Math.random() * w; y = -size; vy = speed; }
+        else if (side === 1) { x = w + size; y = Math.random() * h; vx = -speed; }
+        else if (side === 2) { x = Math.random() * w; y = h + size; vy = -speed; }
+        else { x = -size; y = Math.random() * h; vx = speed; }
+
+        const good = Math.random() > 0.15;
+        state.gifts.push({ x, y, vx, vy, size, good });
+    }
+
+    canvas.addEventListener("mousemove", e => {
+        const r = canvas.getBoundingClientRect();
+        state.playerX = e.clientX - r.left - state.size / 2;
+        state.playerY = e.clientY - r.top - state.size / 2;
+    });
+
+    window.addEventListener("keydown", e => {
+        if (e.key === "ArrowLeft") state.playerX -= 25;
+        if (e.key === "ArrowRight") state.playerX += 25;
+        if (e.key === "ArrowUp") state.playerY -= 25;
+        if (e.key === "ArrowDown") state.playerY += 25;
+    });
+
+    function loop(t) {
+        if (!running) return;
+        const dt = (t - last) / 1000;
+        last = t;
+        update(dt);
+        draw();
+        requestAnimationFrame(loop);
+    }
+
+    function update(dt) {
+        if (!running) return;
+
+        timeLeft -= dt;
+        if (timeLeft <= 0) {
+            running = false;
+            alert("Час вийшов! Твій рахунок: " + state.score);
+            return;
+        }
+
+        state.spawnTimer += dt;
+        if (state.spawnTimer > 0.25) {
+            spawnGift();
+            state.spawnTimer = 0;
+        }
+
+        for (let i = state.gifts.length - 1; i >= 0; i--) {
+            const g = state.gifts[i];
+            g.x += g.vx * dt;
+            g.y += g.vy * dt;
+
+            if (
+                g.x < state.playerX + state.size &&
+                g.x + g.size > state.playerX &&
+                g.y < state.playerY + state.size &&
+                g.y + g.size > state.playerY
+            ) {
+                if (g.good) state.score += 20;
+                else state.score = Math.max(0, state.score - 40);
+
+                state.gifts.splice(i, 1);
+                document.getElementById("score").textContent = state.score;
+                continue;
+            }
+
+            if (g.x < -200 || g.x > canvas.clientWidth + 200 ||
+                g.y < -200 || g.y > canvas.clientHeight + 200)
+                state.gifts.splice(i, 1);
+        }
+    }
+
+    function draw() {
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = "#021018";
+        ctx.fillRect(0, 0, w, h);
+
+        for (const g of state.gifts) {
+            ctx.fillStyle = g.good ? "#ff8ac1" : "#666";
+            ctx.fillRect(g.x, g.y, g.size, g.size);
+        }
+
+        ctx.fillStyle = "#ffce7a";
+        ctx.fillRect(state.playerX, state.playerY, state.size, state.size);
+
+        ctx.fillStyle = "#fff";
+        ctx.font = "20px Arial";
+        ctx.fillText("Час: " + Math.ceil(timeLeft), 20, 30);
+    }
+
+    document.getElementById("startBtn").onclick = () => {
+        if (!running) {
+            running = true;
+            last = performance.now();
+            requestAnimationFrame(loop);
+        }
+    };
+    document.getElementById("resetBtn").onclick = () => {
+        running = false;
+        reset();
+    };
+
+    reset();
+    draw();
+
+    // AUDIO SYSTEM – тепер тільки у вкладці ГРА 🎵
+    const fileInput = document.getElementById("audio-file");
+    const volumeSlider = document.getElementById("volume");
+    const muteBtn = document.getElementById("muteBtn");
+
+    let isMuted = false;
+
+    fileInput.onchange = function () {
+        const f = this.files[0];
+        if (!f) return;
+        const url = URL.createObjectURL(f);
+        bgAudio.src = url;
+        bgAudio.volume = parseFloat(volumeSlider.value);
+
+        // Автовідтворення тільки якщо ми у вкладці ГРА
+        const active = document.querySelector(".tab.active").dataset.tab;
+        if (active === "tab2") bgAudio.play().catch(()=>{});
+    };
+
+    volumeSlider.oninput = () => {
+        bgAudio.volume = parseFloat(volumeSlider.value);
+    };
+
+    muteBtn.onclick = () => {
+        isMuted = !isMuted;
+        bgAudio.muted = isMuted;
+        muteBtn.textContent = isMuted ? "Unmute" : "Mute";
+    };
+</script>
+
+</body>
+
+</html>
